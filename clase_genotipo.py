@@ -49,7 +49,7 @@ vegetales = {
 
 
 class Vegetal:
-    def _init_(self, nombre, sol, agua, temporada, tiempo_crecimiento, mano_obra, precio_kilo):
+    def _init_(self, nombre, sol, agua, temporada, tiempo_crecimiento, mano_obra, precio_kilo, porcentaje,peso_m2):
         self.nombre = nombre
         self.sol = sol #cantidad de luz que necesita el cultivo
         self.agua = agua #cantidad de agua que necesita el cultivo
@@ -57,7 +57,9 @@ class Vegetal:
         self.tiempo_crecimiento = tiempo_crecimiento 
         self.mano_obra = mano_obra
         self.precio_kilo = precio_kilo
+        self.porcentaje = porcentaje
+        self.peso_m2 = peso_m2
 
 class Genotipo:
-    def _init_(self, vegetales):
-        self.vegetales = vegetales  # Lista de tuplas (Vegetal, porcentaje)
+    def _init_(self, cultivos = []):
+        self.cultivos = cultivos  # Lista de tuplas (Vegetal, porcentaje)
