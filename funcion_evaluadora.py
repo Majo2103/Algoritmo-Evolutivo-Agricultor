@@ -17,10 +17,19 @@ def evaluar(genotipo:Genotipo = [], m2 = int, sol = str, agua = str, temp = str)
 
      # calculamos los costos
      costo = 0
-     #encontrar una forma de calcular los costos de la mano de obra para cada planta
+     # El precio aproximado de cuidar un m2 por mes de varios cultivos es presentado en https://www.scielo.sa.cr/pdf/ac/v44n2/0377-9424-ac-44-02-81.pdf
+     base_mano_obra = 400 # Moderado /m2
+     if cultivo.mano_obra == 'Bajo' #/m2
+        base_mano_obra = base_mano_obra * 0.5
+     if cultivo.mano_obra == 'Alto' #/m2
+        base_mano_obra = base_mano_obra * 1.5
+     costo_mano_obra= base_mano_obra * m2
+
+     costo += costo_mano_obra
+     
 
      probabilidad = 1
-     #encontrar una forma de calcular la probabilidad de que crezca el cultivo dado el status quo planta
+     #encontrar una forma de calcular la probabilidad de que crezca el cultivo dado el status quo plantagi
 
 
      utilidad = ingreso - costo
