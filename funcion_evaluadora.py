@@ -45,6 +45,7 @@ def evaluar(genotipo:Genotipo = [], m2 = int, sol = str, agua = str, temp = str)
 
 
 
+
 def probabilidad_crecimiento(cultivo = object, sol = str, agua = str, temp = str):
    prob=1
 
@@ -67,7 +68,31 @@ def probabilidad_crecimiento(cultivo = object, sol = str, agua = str, temp = str
             prob = prob * .7 #ajustar de acuerdo a observaciones
 
 #como la temporada afecta la probabilidad
-   if (temp != cultivo.temp):
-       prob=prob*.6     
+   if (temp != cultivo.temporada):
+       prob = prob *.6 
+
+   if (sol != cultivo.sol):
+      prob = prob *.6    
 
    return prob 
+
+
+
+"""pruebas
+
+jitomate =Vegetal('Jitomate', 'Pleno sol','Moderada','Primavera/Verano','Moderado',15,.50,8)
+cebolla=Vegetal(nombre= "Cebolla",agua= "Moderada",sol="Pleno sol", temporada= "Otoño/Invierno",
+        mano_obra= "Bajo",precio_kilo= 7.5,peso_m2= 4,porcentaje=.50)
+
+cebolla2=Vegetal(nombre= "Cebolla",agua= "Moderada",sol="Pleno sol", temporada= "Otoño/Invierno",
+        mano_obra= "Bajo",precio_kilo= 7.5,peso_m2= 4,porcentaje=.40)
+
+vegetales = [jitomate, cebolla]
+vegetales2 = [jitomate, cebolla2]
+g = Genotipo(vegetales)
+g2 = Genotipo(vegetales2)
+
+print(evaluar(g,m2 = 1000, sol = 'Pleno sol', agua = 'Moderada', temp = 'Primavera/Verano'))
+
+print(evaluar(g2,m2 = 1000, sol = 'Pleno sol', agua = 'Moderada', temp = 'Primavera/Verano'))
+"""
