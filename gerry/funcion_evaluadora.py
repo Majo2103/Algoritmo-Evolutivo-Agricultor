@@ -2,14 +2,16 @@ from clase_genotipo import *
 
 def evaluar(genotipo:Genotipo = [], m2 = int, sol = str, agua = str, temp = str):
   
+  if genotipo.utilidad != 0:
+      return genotipo.utilidad
+  '''
   #checamos que la suma de porcentajes sea =1
   sum = 0 #definimos la suma de porcentajes
   for cultivo in genotipo.cultivos :
     sum += cultivo.porcentaje
   if sum != 1 :
-    return 0
-  
-
+    return 0  
+ '''
   utilidad_total =0
   for cultivo in genotipo.cultivos:
      # calculamos el ingreso generado por el cultivo
@@ -29,21 +31,15 @@ def evaluar(genotipo:Genotipo = [], m2 = int, sol = str, agua = str, temp = str)
 
      costo += costo_mano_obra
 
-
      probabilidad = probabilidad_crecimiento(cultivo,sol,agua,temp) #usamos una función externa
      #encontrar una forma de calcular la probabilidad de que crezca el cultivo dado el status quo plantagi
 
-
      utilidad = ingreso - costo
      utilidad_esperada = utilidad * probabilidad
-     utilidad_total += utilidad
-     genotipo.utilidad = utilidad_total
-  
-  return utilidad
+     utilidad_total += utilidad_esperada
 
-
-
-
+  genotipo.utilidad = utilidad_total  
+  return utilidad_total
 
 def probabilidad_crecimiento(cultivo = object, sol = str, agua = str, temp = str):
    prob=1

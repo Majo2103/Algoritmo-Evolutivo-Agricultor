@@ -108,6 +108,9 @@ class Vegetal:
     
     def __repr__(self):
         return self.nombre
+    
+    def __eq__(self, other):
+        return self.nombre == other.nombre
 
 class Genotipo:
     def __init__(self, cultivos = []): #recibe un arreglo de vegetales

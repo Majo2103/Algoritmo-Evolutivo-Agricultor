@@ -17,17 +17,18 @@ def generate_random_numbers(n):
     random_numbers.append(1 - cuts[-1])
     return random_numbers
 
-def inicializar_poblacion(tam_poblacion, lista_cultivos):
+def inicializar_poblacion(min_cult,tam_poblacion, lista_cultivos):
     poblacion = []
     for _ in range(tam_poblacion):
-        genotipo = crear_combinacion_aleatoria(lista_cultivos)
+        n = random.randint(min_cult, len(lista_cultivos))
+        genotipo = crear_combinacion_aleatoria(n,lista_cultivos)
         genotipo = Genotipo(genotipo)
         poblacion.append(genotipo)
     return poblacion
 
-def crear_combinacion_aleatoria(lista_cultivos):
+def crear_combinacion_aleatoria(n, lista_cultivos):
     genotipo = []
-    random_numbers = generate_random_numbers(len(lista_cultivos))
+    random_numbers = generate_random_numbers(n)
     cultivos = list(lista_cultivos.copy())
     
     for i in range(len(random_numbers)):
@@ -48,10 +49,13 @@ def seleccionar(poblacion,m2,sol,agua,temp):
     # Ordenar la población con base en la evaluación de cada individuo
     utilidades = {individuo: evaluar(individuo,m2,sol,agua,temp) for individuo in poblacion}
     
+    ##TO DO: Ordenar bien los individuos segun su utilidad:
+    poblacion_ordenada = list(utilidades.items())
+    poblacion_ordenada.sort(key=lambda x: x[1], reverse=True)
+        
     #Ordenar la población de acuerdo a la utilidad:
-    poblacion_ordenada = [k for k, v in sorted(utilidades.items(), key=lambda item: item[1], reverse=True)]
     # Calcular el número de individuos a seleccionar
-    num_seleccionados = int(len(poblacion) * 0.3)  # Seleccionar el 30% de los mejores cultivos para ser padres.
+    num_seleccionados = int(len(poblacion) * 0.4)  # Seleccionar el 40% de los mejores cultivos para ser padres.
     # Seleccionar los mejores individuos
     seleccionados = poblacion_ordenada[:num_seleccionados]
     no_seleccionados = poblacion_ordenada[num_seleccionados:]
@@ -60,7 +64,10 @@ def seleccionar(poblacion,m2,sol,agua,temp):
     
     
 def ajustar_porcentajes(originales, umbral):
-    perturbados = [(p[0],max(random.uniform(0, umbral), p[1] + random.uniform(-umbral, umbral))) for p in originales]
+    perturbados = []
+    
+    for p in originales:
+        perturbados.append((p[0],max(random.uniform(0, umbral), p[1] + random.uniform(-umbral, umbral))))
     suma_perturbados = sum(p[1] for p in perturbados)
     normalizados = [(p[0],p[1] / suma_perturbados) for p in perturbados]
     return normalizados
@@ -68,10 +75,31 @@ def ajustar_porcentajes(originales, umbral):
 
 def cruzar(num_hijos, padre1, padre2, umbral):
     hijos = []
-    punto_corte = len(padre1.cultivos) // 2
+    punto_corte = min(len(padre1.cultivos),len(padre2.cultivos)) // 2
 
-    hijo1 = Genotipo(padre1.cultivos[:punto_corte] + padre2.cultivos[punto_corte:])
-    hijo2 = Genotipo(padre2.cultivos[:punto_corte] + padre1.cultivos[punto_corte:])
+    pre1 = padre1.cultivos[:punto_corte] + padre2.cultivos[punto_corte:]
+    pre2 = padre2.cultivos[:punto_corte] + padre1.cultivos[punto_corte:]
+
+    cult1 = []
+    cult2 = []
+#De cada uno de los nuevos genotipos, si en la lista hay nombres de cultivos repetidos, se suman los porcentajes de dichos cultivos:
+  
+    for i in range(len(pre1)):
+        for j in range(i+1,len(pre1)):
+            if pre1[i].nombre == pre1[j].nombre:
+                pre1[i].porcentaje += pre1[j].porcentaje
+                break
+        if pre1[i] not in cult1:
+            cult1.append(pre1[i])
+    hijo1 = Genotipo(cult1)
+    
+    for i in range(len(pre2)):
+        for j in range(i+1,len(pre2)):
+            if pre2[i].nombre == pre2[j].nombre:
+                pre2[i].porcentaje += pre2[j].porcentaje
+        if pre2[i] not in cult2:
+            cult2.append(pre2[i])
+    hijo2 = Genotipo(cult2)
 
     # Generar hijos con nuevos porcentajes basados en los originales con cierto umbral de variación
     for _ in range(num_hijos):
@@ -90,23 +118,42 @@ def mutar(no_seleccionados, umbral):
             cultivo.porcentaje = [p[1] for p in nuevos_porcentajes if p[0] == cultivo.nombre][0]
     return no_seleccionados
 
-def algoritmo_evolutivo(pob_inicial, num_generaciones, umbral1, umbral2, m2, sol, agua, temp):
-    poblacion = inicializar_poblacion(pob_inicial, lista_cultivos)
+
+def algoritmo_evolutivo(min_cult,pob_inicial, num_generaciones, umbral1, umbral2, m2, sol, agua, temp):
+    poblacion = inicializar_poblacion(min_cult,pob_inicial, lista_cultivos)
     for _ in range(num_generaciones):
         seleccionados, no_seleccionados = seleccionar(poblacion,m2,sol,agua,temp)
-        nueva_generacion = seleccionados+mutar(no_seleccionados, umbral1)
-        while len(nueva_generacion) < len(poblacion):
+        
+        seleccionados = [individuo[0] for individuo in seleccionados]
+        no_seleccionados = [individuo[0] for individuo in no_seleccionados]
+        
+        num_mutados = int(len(no_seleccionados) * 1)  # Seleccionar el 70% de los individuos no seleccionados para mutar
+        random_no_seleccionados = random.sample(no_seleccionados, num_mutados)
+        
+        for no_selected in random_no_seleccionados:
+            no_selected.utilidad = 0
+        no_seleccionados = mutar(random_no_seleccionados, umbral1)
+        nueva_generacion = seleccionados + no_seleccionados
+        #El resto de la población se genera cruzando a los seleccionados
+        
+        #EL CRUZAMIENTO NO FUNCIONA BIEN DEL TODO
+        while len(nueva_generacion) < pob_inicial:
             if seleccionados:
-                padre1, padre2 = random.choice(seleccionados), random.choice(seleccionados)
-                n = random.randint(2, 6)
-                hijos = cruzar(n, padre1, padre2, umbral2)
+                padre1 = random.choice(seleccionados)
+                random.shuffle(seleccionados)
+                padre2 = random.choice(seleccionados)
+                
+                hijos = cruzar(2, padre1, padre2, umbral2)
                 nueva_generacion.extend(hijos)
         poblacion = nueva_generacion
     
-    # Regresar el mejor individuo de la última generación:
-    utilidades = {individuo: evaluar(individuo,m2,sol,agua,temp) for individuo in poblacion}
-    mejor_individuo = max(utilidades, key=utilidades.get)
-    return mejor_individuo
+    utilidades={}
+    for individuo in poblacion:
+        utilidades[individuo] = evaluar(individuo,m2,sol,agua,temp)
+    poblacion_ordenada = list(utilidades.items())
+    poblacion_ordenada.sort(key=lambda x: x[1], reverse=True)
+
+    return poblacion_ordenada[0][0]
     
 for i in range(10):
-    print(algoritmo_evolutivo(300, 4000,0.1,0.05, m2 = 1000, sol = 'Pleno sol', agua = 'Moderada', temp = 'Primavera/Verano'))
+    print(algoritmo_evolutivo(3,30000,10,0.20,0.05, m2 = 1000, sol = 'Pleno sol', agua = 'Moderada', temp = 'Primavera/Verano'))
