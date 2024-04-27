@@ -51,7 +51,7 @@ def seleccionar(poblacion,m2,sol,agua,temp):
     #Ordenar la población de acuerdo a la utilidad:
     poblacion_ordenada = [k for k, v in sorted(utilidades.items(), key=lambda item: item[1], reverse=True)]
     # Calcular el número de individuos a seleccionar
-    num_seleccionados = int(len(poblacion) * 0.2)  # Seleccionar el 60% de los mejores cultivos para ser padres.
+    num_seleccionados = int(len(poblacion) * 0.3)  # Seleccionar el 30% de los mejores cultivos para ser padres.
     # Seleccionar los mejores individuos
     seleccionados = poblacion_ordenada[:num_seleccionados]
     no_seleccionados = poblacion_ordenada[num_seleccionados:]
@@ -60,7 +60,7 @@ def seleccionar(poblacion,m2,sol,agua,temp):
     
     
 def ajustar_porcentajes(originales, umbral):
-    perturbados = [(p[0],max(p[1], p[1] + random.uniform(-umbral, umbral))) for p in originales]
+    perturbados = [(p[0],max(random.uniform(0, umbral), p[1] + random.uniform(-umbral, umbral))) for p in originales]
     suma_perturbados = sum(p[1] for p in perturbados)
     normalizados = [(p[0],p[1] / suma_perturbados) for p in perturbados]
     return normalizados
@@ -90,16 +90,16 @@ def mutar(no_seleccionados, umbral):
             cultivo.porcentaje = [p[1] for p in nuevos_porcentajes if p[0] == cultivo.nombre][0]
     return no_seleccionados
 
-def algoritmo_evolutivo(pob_inicial, num_generaciones, m2,sol,agua,temp):
+def algoritmo_evolutivo(pob_inicial, num_generaciones, umbral1, umbral2, m2, sol, agua, temp):
     poblacion = inicializar_poblacion(pob_inicial, lista_cultivos)
     for _ in range(num_generaciones):
         seleccionados, no_seleccionados = seleccionar(poblacion,m2,sol,agua,temp)
-        nueva_generacion = seleccionados+mutar(no_seleccionados, 0.05)
+        nueva_generacion = seleccionados+mutar(no_seleccionados, umbral1)
         while len(nueva_generacion) < len(poblacion):
             if seleccionados:
                 padre1, padre2 = random.choice(seleccionados), random.choice(seleccionados)
                 n = random.randint(2, 6)
-                hijos = cruzar(n, padre1, padre2, 0.1)
+                hijos = cruzar(n, padre1, padre2, umbral2)
                 nueva_generacion.extend(hijos)
         poblacion = nueva_generacion
     
@@ -108,5 +108,5 @@ def algoritmo_evolutivo(pob_inicial, num_generaciones, m2,sol,agua,temp):
     mejor_individuo = max(utilidades, key=utilidades.get)
     return mejor_individuo
     
-    
-print(algoritmo_evolutivo(2000, 5000,m2 = 1000, sol = 'Pleno sol', agua = 'Moderada', temp = 'Primavera/Verano'))
+for i in range(10):
+    print(algoritmo_evolutivo(300, 4000,0.1,0.05, m2 = 1000, sol = 'Pleno sol', agua = 'Moderada', temp = 'Primavera/Verano'))

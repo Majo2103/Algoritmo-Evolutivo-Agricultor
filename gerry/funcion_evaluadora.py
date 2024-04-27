@@ -19,7 +19,7 @@ def evaluar(genotipo:Genotipo = [], m2 = int, sol = str, agua = str, temp = str)
      costo = 0
      # El precio aproximado de cuidar un m2 por mes de varios cultivos es presentado en https://www.scielo.sa.cr/pdf/ac/v44n2/0377-9424-ac-44-02-81.pdf
      #Suponemos que la mano de
-     base_mano_obra = 40 # Moderado /m2
+     base_mano_obra = 4 # Moderado /m2
      if cultivo.mano_obra == 'Bajo': #/m2 
         base_mano_obra = base_mano_obra * 0.5
      if cultivo.mano_obra == 'Alto': #/m2
@@ -37,7 +37,7 @@ def evaluar(genotipo:Genotipo = [], m2 = int, sol = str, agua = str, temp = str)
      utilidad = ingreso - costo
      utilidad_esperada = utilidad * probabilidad
      utilidad_total += utilidad
-  
+     genotipo.utilidad = utilidad_total
   
   return utilidad
 

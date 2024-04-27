@@ -6,7 +6,7 @@ vegetales = { #diccionario de vegetales que contine todos los posibles vegetales
         "cantidad_de_luz": "Pleno sol",
         "temporada": "Primavera/Verano",
         "cuidado": "Moderado",
-        "precio_por_kilo": 15.00,
+        "precio_por_kilo": 30,
         "peso_m2": 8
     },
 
@@ -16,7 +16,7 @@ vegetales = { #diccionario de vegetales que contine todos los posibles vegetales
         "cantidad_de_luz": "Pleno sol",
         "temporada": "Otoño/Invierno",
         "cuidado": "Bajo",
-        "precio_por_kilo": 7.5,
+        "precio_por_kilo": 30,
         "peso_m2": 4
     },
 
@@ -26,7 +26,7 @@ vegetales = { #diccionario de vegetales que contine todos los posibles vegetales
         "cantidad_de_luz": "Pleno sol",
         "temporada": "Primavera/Verano",
         "cuidado": "Moderado",
-        "precio_por_kilo": 3.5,
+        "precio_por_kilo": 30,
         "peso_m2": .5
     },
 
@@ -36,7 +36,7 @@ vegetales = { #diccionario de vegetales que contine todos los posibles vegetales
         "cantidad_de_luz": "Pleno sol",
         "temporada": "Primavera/Verano",
         "cuidado": "Moderado",
-        "precio_por_kilo": 7.5,
+        "precio_por_kilo": 30,
         "peso_m2": 10
     },
     "chile": {
@@ -45,7 +45,7 @@ vegetales = { #diccionario de vegetales que contine todos los posibles vegetales
         "cantidad_de_luz": "Pleno sol",
         "temporada": "Primavera/Verano",
         "cuidado": "Moderado",
-        "precio_por_kilo": 5.5,
+        "precio_por_kilo": 30,
         "peso_m2": 3
     },
     "pimiento": {
@@ -54,7 +54,7 @@ vegetales = { #diccionario de vegetales que contine todos los posibles vegetales
         "cantidad_de_luz": "Media",
         "temporada": "Primavera/Verano",
         "cuidado": "Moderado",
-        "precio_por_kilo": 4.5,
+        "precio_por_kilo": 50,
         "peso_m2": 2
 
     },
@@ -64,7 +64,7 @@ vegetales = { #diccionario de vegetales que contine todos los posibles vegetales
         "cantidad_de_luz": "Pleno sol",
         "temporada": "Otoño/Invierno",
         "cuidado": "Moderado",
-        "precio_por_kilo": 2,
+        "precio_por_kilo": 10,
         "peso_m2": 5
     },
     "lechuga": {
@@ -73,7 +73,7 @@ vegetales = { #diccionario de vegetales que contine todos los posibles vegetales
         "cantidad_de_luz": "Media",
         "temporada": "Primavera/Verano",
         "cuidado": "Moderado",
-        "precio_por_kilo": 4,
+        "precio_por_kilo": 20,
         "peso_m2": .5
     },
     "papa": {
@@ -82,7 +82,7 @@ vegetales = { #diccionario de vegetales que contine todos los posibles vegetales
         "cantidad_de_luz": "Pleno sol",
         "temporada": "Primavera/Verano",
         "cuidado": "Moderado",
-        "precio_por_kilo": 3,
+        "precio_por_kilo": 40,
         "peso_m2": 5
     }
 
@@ -102,7 +102,22 @@ class Vegetal:
         self.precio_kilo = precio_kilo #double
         self.porcentaje = porcentaje #double
         self.peso_m2 = peso_m2 #double
+        
+    def __str__(self):
+        return self.nombre
+    
+    def __repr__(self):
+        return self.nombre
 
 class Genotipo:
     def __init__(self, cultivos = []): #recibe un arreglo de vegetales
-        self.cultivos = cultivos  
+        self.cultivos = cultivos
+        self.utilidad = 0
+        
+    def __str__(self):
+        #Utilidad y, cultivos con su porcentaje:
+        cadena = 'Utilidad: '+str(self.utilidad)+'\n'
+        for cultivo in self.cultivos:
+            cadena += cultivo.nombre+' '+str(cultivo.porcentaje)+'\n'
+            
+        return cadena
