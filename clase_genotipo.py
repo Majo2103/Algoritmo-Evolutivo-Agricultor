@@ -91,7 +91,7 @@ vegetales = { #diccionario de vegetales que contine todos los posibles vegetales
 
 
 class Vegetal:
-    def __init__(self, nombre, sol, agua, temporada, tiempo_crecimiento, mano_obra, precio_kilo, porcentaje,peso_m2):
+    def __init__(self, nombre, sol, agua, temporada, mano_obra, precio_kilo, porcentaje,peso_m2):
         self.nombre = nombre #nombre del vegetal
         self.sol = sol #cantidad de luz que necesita el cultivo: plena luz, sombra
         self.agua = agua #cantidad de agua que necesita el cultivo: Alta, Baja, Moderada
@@ -106,3 +106,5 @@ class Vegetal:
 class Genotipo:
     def __init__(self, cultivos = []): #recibe un arreglo de vegetales
         self.cultivos = cultivos  
+
+

@@ -19,13 +19,13 @@ def evaluar(genotipo:Genotipo = [], m2 = int, sol = str, agua = str, temp = str)
      costo = 0
      # El precio aproximado de cuidar un m2 por mes de varios cultivos es presentado en https://www.scielo.sa.cr/pdf/ac/v44n2/0377-9424-ac-44-02-81.pdf
      #Suponemos que la mano de
-     base_mano_obra = 400 # Moderado /m2
-     if cultivo.mano_obra == 'Bajo' #/m2 
+     base_mano_obra = 20 # Moderado /m2
+     if cultivo.mano_obra == 'Bajo': # /m2
         base_mano_obra = base_mano_obra * 0.5
-     if cultivo.mano_obra == 'Alto' #/m2
+     if cultivo.mano_obra == 'Alto':# /m2
         base_mano_obra = base_mano_obra * 1.5
 
-     costo_mano_obra= base_mano_obra * m2
+     costo_mano_obra= base_mano_obra * m2# corregir
 
      costo += costo_mano_obra
 
@@ -33,13 +33,12 @@ def evaluar(genotipo:Genotipo = [], m2 = int, sol = str, agua = str, temp = str)
      probabilidad = probabilidad_crecimiento(cultivo,sol,agua,temp) #usamos una función externa
      #encontrar una forma de calcular la probabilidad de que crezca el cultivo dado el status quo plantagi
 
-
-     utilidad = ingreso - costo
-     utilidad_esperada = utilidad * probabilidad
-     utilidad_total += utilidad
+    
+     utilidad_esperada = (ingreso * probabilidad) - costo #el costo tiene una probabilidad de 1, pero el ingreso no esta asegurado
+     utilidad_total += utilidad_esperada
   
   
-  return utilidad
+  return utilidad_total
 
 
 
@@ -67,7 +66,31 @@ def probabilidad_crecimiento(cultivo = object, sol = str, agua = str, temp = str
             prob = prob * .7 #ajustar de acuerdo a observaciones
 
 #como la temporada afecta la probabilidad
-   if (temp != cultivo.temp):
-       prob=prob*.6     
+   if (temp != cultivo.temporada):
+       prob = prob *.6 
+
+   if (sol != cultivo.sol):
+      prob = prob *.6    
 
    return prob 
+
+
+
+"""pruebas
+
+jitomate =Vegetal('Jitomate', 'Pleno sol','Moderada','Primavera/Verano','Moderado',15,.50,8)
+cebolla=Vegetal(nombre= "Cebolla",agua= "Moderada",sol="Pleno sol", temporada= "Otoño/Invierno",
+        mano_obra= "Bajo",precio_kilo= 7.5,peso_m2= 4,porcentaje=.50)
+
+cebolla2=Vegetal(nombre= "Cebolla",agua= "Moderada",sol="Pleno sol", temporada= "Otoño/Invierno",
+        mano_obra= "Bajo",precio_kilo= 7.5,peso_m2= 4,porcentaje=.40)
+
+vegetales = [jitomate, cebolla]
+vegetales2 = [jitomate, cebolla2]
+g = Genotipo(vegetales)
+g2 = Genotipo(vegetales2)
+
+print(evaluar(g,m2 = 1000, sol = 'Pleno sol', agua = 'Moderada', temp = 'Primavera/Verano'))
+
+print(evaluar(g2,m2 = 1000, sol = 'Pleno sol', agua = 'Moderada', temp = 'Primavera/Verano'))
+"""
