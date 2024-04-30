@@ -1,6 +1,19 @@
+#Equipo 5
+# Integrantes: María José Velázquez (200078), Frida Márquez (202919), Gerardo Guerrero (203214)
+# Description: Este archivo contiene la implementación de un algoritmo evolutivo para la optimización de la distribución de cultivos en un campo agrícola.
+
 import random
 
-#diccionario de vegetales que contine todos los posibles vegetales y su información
+'''Diccionario que contiene información sobre diversos tipos de vegetales. 
+   Cada vegetal está representado por una clave (nombre del vegetal) y un diccionario de atributos:
+     - 'nombre': nombre común del vegetal.
+     - 'agua_necesaria': cantidad de agua necesaria para su óptimo crecimiento.
+     - 'cantidad_de_luz': cantidad de luz solar necesaria.
+     - 'temporada': temporada principal de crecimiento del vegetal.
+     - 'cuidado': mano de obra necesaria para el crecimiento del vegetal. 
+     - 'precio_por_kilo': precio promedio por kilogramo del vegetal en el mercado.
+     - 'peso_m2': producción promedio del vegetal por metro cuadrado.''' #CHECAR ESTE Y CUIDADO
+
 vegetales = { 
     "jitomate": {
         "nombre": "Jitomate",
@@ -140,11 +153,24 @@ vegetales = {
         "cuidado": "Bajo",
         "precio_por_kilo": 120,
         "peso_m2": 1.5
-    }
+    }   
 }
 
 class Vegetal:
+    """
+    Representa un vegetal con sus características de cultivo.
+    
+    Atributos:
+        nombre (str): Nombre del vegetal.
+        cantidad_de_luz (str): Requisitos de luz solar (ej. "Pleno sol").
+        agua_necesaria (str): Necesidad de agua (ej. "Moderada").
+        temporada (str): Temporada de cultivo principal (ej. "Primavera/Verano").
+        cuidado (str): Nivel de cuidado necesario (ej. "Moderado").
+        precio_por_kilo (float): Precio en el mercado por kilogramo.
+        peso_m2 (float): Producción en kilogramos por metro cuadrado.
+    """
     def __init__(self, nombre, cantidad_de_luz, agua_necesaria, temporada, cuidado, precio_por_kilo, peso_m2):
+    #Inicializa un objeto Vegetal con los datos proporcionados.
         self.nombre = nombre
         self.cantidad_de_luz = cantidad_de_luz
         self.agua_necesaria = agua_necesaria
@@ -154,33 +180,36 @@ class Vegetal:
         self.peso_m2 = peso_m2
 
     def __eq__(self, other):
+    #Comprueba si otro objeto Vegetal es igual a este, basado en el nombre.
         if isinstance(other, Vegetal):
             return self.nombre == other.nombre
         return False
 
     def __hash__(self):
+    #Devuelve un valor hash basado en el nombre del vegetal.
         return hash(self.nombre)
 
     def __repr__(self):
+    #Devuelve el nombre del vegetal como su representación en cadena.
         return self.nombre
     
-
 class Genotipo:
-    def __init__(self, cultivos = {}): #recibe un diccionario de vegetales
+    def __init__(self, cultivos={}):
         self.cultivos = cultivos
         self.utilidad = 0
-        
+
     def __str__(self):
-        #Utilidad y, cultivos con su porcentaje:
-        cadena = 'Utilidad: '+str(self.utilidad)+'\n'
+        # Formatea la utilidad como un número con separadores de miles y un signo de pesos.
+        utilidad_formateada = '${:,.0f}'.format(self.utilidad)
+        cadena = 'Utilidad: ' + utilidad_formateada + '\n'
         for cultivo in self.cultivos:
-            cadena += str(cultivo)+': '+str(round(self.cultivos[cultivo],3)*100)+'%\n'            
+            cadena += str(cultivo) + ': ' + str(round(self.cultivos[cultivo], 3) * 100) + '%\n'
         return cadena
-    
-    def __repr__(self) -> str:
+
+    def __repr__(self):
         return self.__str__()
-
-
+    
+#CAMBIAR ESTO A ESPAÑOL
 def generate_random_numbers(n, min_gap=0.05):
     n = n + 1
     if n < 1:
@@ -273,7 +302,6 @@ def evaluar(genotipo:Genotipo = {}, m2 = int, sol = str, agua = str, temp = str)
   genotipo.utilidad = utilidad_total  
   return utilidad_total
 
-
 def probabilidad_crecimiento(cultivo = object, sol = str, agua = str, temp = str):
    prob=1
 
@@ -328,7 +356,7 @@ def normalizar(genotipo):
     genotipo.cultivos = {cultivo: prop / suma_total for cultivo, prop in genotipo.cultivos.items()}
 
 
-def cruza_genotipos(genotipo1, genotipo2, variacion=0.12):
+def cruza_genotipos(min_cult, genotipo1, genotipo2, variacion=0.12):
     # Unificar todos los cultivos en ambos genotipos
     todos_los_cultivos = set(genotipo1.cultivos.keys()).union(set(genotipo2.cultivos.keys()))
     
@@ -343,13 +371,22 @@ def cruza_genotipos(genotipo1, genotipo2, variacion=0.12):
         mid = (prop1 + prop2) / 2
         
         # Calcular nueva proporción basada en una media ponderada y una variación
-        nueva_prop1 =  mid + random.uniform(-variacion, variacion)
-        if nueva_prop1 > 0.05:
-            cultivos_descendiente1[cultivo] = nueva_prop1  # Evitar proporciones negativas
-
+        nueva_prop1 = mid + random.uniform(-variacion, variacion)
         nueva_prop2 = mid + random.uniform(-variacion, variacion)
+        
+        if nueva_prop1 > 0.05:
+            cultivos_descendiente1[cultivo] = nueva_prop1
         if nueva_prop2 > 0.05:
             cultivos_descendiente2[cultivo] = nueva_prop2
+    
+    # Asegurar el mínimo de cultivos
+    while len(cultivos_descendiente1) < min_cult:
+        cultivo_extra = random.choice(list(todos_los_cultivos))
+        cultivos_descendiente1[cultivo_extra] = 0.05 + random.uniform(0, 0.1)
+    
+    while len(cultivos_descendiente2) < min_cult:
+        cultivo_extra = random.choice(list(todos_los_cultivos))
+        cultivos_descendiente2[cultivo_extra] = 0.05 + random.uniform(0, 0.1)
     
     # Crear instancias de Genotipo para los descendientes
     descendiente1 = Genotipo(cultivos=cultivos_descendiente1)
@@ -361,6 +398,7 @@ def cruza_genotipos(genotipo1, genotipo2, variacion=0.12):
     
     return descendiente1, descendiente2
 
+
 def mutar_genotipo(genotipo, var = 0.15):
     genotipo.utilidad= 0
     for cultivo in genotipo.cultivos:
@@ -370,23 +408,22 @@ def mutar_genotipo(genotipo, var = 0.15):
     normalizar(genotipo)
 
 
-def algoritmo_evolutivo(min_cult, pob_inicial, num_generaciones, umbral1, umbral2, m2, sol, agua, temp):
+def algoritmo_evolutivo(min_cult, pob_inicial, num_generaciones, umbral1, 
+                        m2, sol, agua, temp):
     poblacion = inicializar_poblacion(min_cult, pob_inicial, lista_cultivos)
     
     for _ in range(num_generaciones):
         seleccionados, no_seleccionados = seleccionar(poblacion, m2, sol, agua, temp, umbral1)
         
-        
-        for no_selected in no_seleccionados[:int(len(no_seleccionados)*(1-umbral1)/2)]:
-            mutar_genotipo(no_selected, umbral2)
-            seleccionados.append(no_selected)
-
-        while len(seleccionados) < pob_inicial:
+        no_seleccionados = inicializar_poblacion(min_cult, int(pob_inicial*.5), lista_cultivos)
+        nueva_generacion = seleccionados + no_seleccionados
+        while len(nueva_generacion) < pob_inicial:
             genotipo1 = random.choice(seleccionados)
             genotipo2 = random.choice(seleccionados)
-            descendiente1, descendiente2 = cruza_genotipos(genotipo1, genotipo2)
-            seleccionados.append(descendiente1)
-            seleccionados.append(descendiente2)
+            descendiente1, descendiente2 = cruza_genotipos(min_cult,genotipo1, genotipo2)
+            nueva_generacion.append(descendiente1)
+            nueva_generacion.append(descendiente2)
+        poblacion = nueva_generacion
             
     return seleccionados[0]
 
@@ -395,52 +432,42 @@ def algoritmo_evolutivo(min_cult, pob_inicial, num_generaciones, umbral1, umbral
 #   print(top,sum(top.cultivos.values()))
 
 class ParametrosAlgoritmo:
-    def __init__(self, pob_inicial, num_generaciones, umbral1, umbral2):
+    def __init__(self, pob_inicial, num_generaciones, umbral1):
         self.pob_inicial = pob_inicial
         self.num_generaciones = num_generaciones
         self.umbral1 = umbral1
-        self.umbral2 = umbral2
 
     def __str__(self):
-        return f"pob_inicial: {self.pob_inicial}, num_generaciones: {self.num_generaciones}, umbral1: {self.umbral1}, umbral2: {self.umbral2}"
+        return f"pob_inicial: {self.pob_inicial}, num_generaciones: {self.num_generaciones}, umbral1: {self.umbral1}"
 
-def evaluar_parametros(parametros, m2, sol, agua, temp):
-    resultado = algoritmo_evolutivo(min_cult=3,  # Asumimos un mínimo fijo de cultivos para simplificar
-                                    pob_inicial=parametros.pob_inicial,
-                                    num_generaciones=parametros.num_generaciones,
-                                    umbral1=parametros.umbral1,
-                                    umbral2=parametros.umbral2,
-                                    m2=m2, sol=sol, agua=agua, temp=temp)
-    return resultado.utilidad  # Asumimos que el resultado es el mejor individuo y retornamos su utilidad
-
-def mutar_parametros(parametros):
-    # Ejemplo de mutación simple, ajustar según necesidad
-    parametros.pob_inicial = max(10, int(parametros.pob_inicial * random.uniform(0.8, 1.2)))
-    parametros.num_generaciones = max(1, int(parametros.num_generaciones * random.uniform(0.8, 1.2)))
-    parametros.umbral1 = max(0.1, min(parametros.umbral1 + random.uniform(-0.1, 0.1), 0.9))
-    parametros.umbral2 = max(0.01, min(parametros.umbral2 + random.uniform(-0.05, 0.05), 0.3))
+def evaluar_parametros(parametros, min_cult, m2, sol, agua, temp):
+    resultado = algoritmo_evolutivo(min_cult,
+                                    parametros.pob_inicial,
+                                    parametros.num_generaciones,
+                                    parametros.umbral1,
+                                    m2, sol, agua, temp)
+    return resultado.utilidad
 
 def cruzar_parametros(padre1, padre2):
-    # Ejemplo de cruzamiento simple
     nuevo_pob_inicial = (padre1.pob_inicial + padre2.pob_inicial) // 2
     nuevo_num_generaciones = (padre1.num_generaciones + padre2.num_generaciones) // 2
     nuevo_umbral1 = (padre1.umbral1 + padre2.umbral1) / 2
-    nuevo_umbral2 = (padre1.umbral2 + padre2.umbral2) / 2
-    return ParametrosAlgoritmo(nuevo_pob_inicial, nuevo_num_generaciones, nuevo_umbral1, nuevo_umbral2)
+    return ParametrosAlgoritmo(nuevo_pob_inicial, nuevo_num_generaciones, nuevo_umbral1)
 
-def meta_algoritmo_evolutivo(num_generaciones, m2, sol, agua, temp):
-    # Inicialización de la población con parámetros aleatorios
-    poblacion = [ParametrosAlgoritmo(random.randint(10000, 50000), random.randint(1, 10),
-                                     random.uniform(0.1, 0.9), random.uniform(0.01, 0.3))
+def mutar_parametros(parametros):
+    parametros.pob_inicial = max(10, int(parametros.pob_inicial * random.uniform(0.8, 1.2)))
+    parametros.num_generaciones = max(1, int(parametros.num_generaciones * random.uniform(0.8, 1.2)))
+    parametros.umbral1 = max(0.1, min(parametros.umbral1 + random.uniform(-0.1, 0.1), 0.9))
+
+def meta_algoritmo_evolutivo(min_cult, num_generaciones, m2, sol, agua, temp):
+    poblacion = [ParametrosAlgoritmo(random.randint(10, 50), random.randint(1, 10), random.uniform(0.1, 0.9))
                  for _ in range(10)]
 
     for _ in range(num_generaciones):
-        evaluaciones = [(individuo, evaluar_parametros(individuo, m2, sol, agua, temp))
+        evaluaciones = [(individuo, evaluar_parametros(individuo, min_cult, m2, sol, agua, temp))
                         for individuo in poblacion]
-        # Seleccionar los mejores para continuar
         poblacion = [x[0] for x in sorted(evaluaciones, key=lambda x: x[1], reverse=True)[:5]]
 
-        # Cruzar y mutar para formar la nueva generación
         nueva_poblacion = []
         while len(nueva_poblacion) < 10:
             padre1, padre2 = random.sample(poblacion, 2)
@@ -449,57 +476,62 @@ def meta_algoritmo_evolutivo(num_generaciones, m2, sol, agua, temp):
             nueva_poblacion.append(hijo)
         poblacion = nueva_poblacion
 
-    # Devolver los mejores parámetros encontrados
-    mejor_individuo = max(poblacion, key=lambda ind: evaluar_parametros(ind, m2, sol, agua, temp))
+    mejor_individuo = max(poblacion, key=lambda ind: evaluar_parametros(ind, min_cult, m2, sol, agua, temp))
     return mejor_individuo
 
+
+
 ##############################################################################################################################
-'''parametros = meta_algoritmo_evolutivo(10, 1000, 'Pleno sol', 'Moderada', 'Primavera/Verano')
+'''PRUEBAS
+
+    parametros = meta_algoritmo_evolutivo(10, 1000, 'Pleno sol', 'Moderada', 'Primavera/Verano')
 print (parametros)
 pob_inicial = parametros.pob_inicial
 num_generaciones = parametros.num_generaciones
 umbral1 = parametros.umbral1
-umbral2 = parametros.umbral2
+
 
 
 #print(meta_algoritmo_evolutivo(10, 1000, 'Pleno sol', 'Moderada', 'Primavera/Verano'))
 
 #for i in range(10):
-    #print(algoritmo_evolutivo(3,pob_inicial,num_generaciones,umbral1,umbral2, m2 = 1000, sol = 'Pleno sol', agua = 'Moderada', temp = 'Primavera/Verano'))
+    #print(algoritmo_evolutivo(3,pob_inicial,num_generaciones,umbral1, m2 = 1000, sol = 'Pleno sol', agua = 'Moderada', temp = 'Primavera/Verano'))
   '''
+##############################################################################################################################
+
 def ejecutar_meta_algoritmo_interactivo():
     print("\nBienvenido al sistema de optimización de algoritmo evolutivo para cultivos.")
     print("Por favor, introduce los siguientes parámetros ambientales para comenzar la optimización:")
 
     # Solicitar parámetros al usuario
     m2 = float(input("\nIntroduce el área en metros cuadrados (m2) disponible para los cultivos: "))
-    sol = input("Introduce la cantidad de luz solar que recibe el campo (Pleno sol o Media sombra): ")
+    sol = input("Introduce la cantidad de luz solar que recibe el campo (Pleno sol o Media): ")
     agua = input("Introduce la cantidad de agua que recibe el campo (Baja o Moderada o Alta): ")
     temp = input("Introduce la temporada en la que te gustaría plantar los vegetales (Primavera/Verano u Otoño/Invierno): ")
 
     # Validar los valores de entrada (esto es opcional y puede ser más sofisticado según los requisitos)
-    if sol not in ['Pleno sol','Media sombra'] or agua not in ['Baja', 'Moderada', 'Alta'] or temp not in ['Primavera/Verano', 'Otoño/Invierno']:
+    if sol not in ['Pleno sol','Media'] or agua not in ['Baja', 'Moderada', 'Alta'] or temp not in ['Primavera/Verano', 'Otoño/Invierno']:
         print("Algunos de los valores introducidos son inválidos. Asegúrate de que la cantidad de luz solar, la disponibilidad de agua y la temporada estén correctamente especificadas.")
         return
 
     print ("\nCalculando la mejor distribución ")
     # Ejecutar el meta algoritmo
-    mejores_parametros = meta_algoritmo_evolutivo(10, m2=m2, sol=sol, agua=agua, temp=temp)
+    mejores_parametros = meta_algoritmo_evolutivo(3,10, m2=m2, sol=sol, agua=agua, temp=temp)
     
     #Mejores parámetros
     pob_inicial = mejores_parametros.pob_inicial
     num_generaciones = mejores_parametros.num_generaciones
     umbral1 = mejores_parametros.umbral1
-    umbral2 = mejores_parametros.umbral2
+    
 
 
     #Ejecutar el algoritmo evolutivo con los mejores parámetros encontrados
 
-    resultado = algoritmo_evolutivo(3,pob_inicial=pob_inicial,num_generaciones=num_generaciones,umbral1=umbral1,umbral2=umbral2, m2 = m2, sol = sol, agua = agua, temp = temp)
+    resultado = algoritmo_evolutivo(3,pob_inicial=pob_inicial,num_generaciones=num_generaciones,umbral1=umbral1, m2 = m2, sol = sol, agua = agua, temp = temp)
 
     # Mostrar los resultados
     print("\nLa mejor distribución de vegetales para el campo encontrada es:")
     print(resultado)
-
+    print (mejores_parametros) #DESPUES BORRAR ESTA LINEA
 # Ejecutar la función para iniciar la interacción
 ejecutar_meta_algoritmo_interactivo()
