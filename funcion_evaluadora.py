@@ -72,7 +72,7 @@ def probabilidad_crecimiento(cultivo = object, sol = str, agua = str, temp = str
        prob = prob *.6 
 
    if (sol != cultivo.sol):
-      prob = prob *.6    
+      prob = prob *.8
 
    return prob 
 
