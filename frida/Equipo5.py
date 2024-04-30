@@ -532,6 +532,6 @@ def ejecutar_meta_algoritmo_interactivo():
     # Mostrar los resultados
     print("\nLa mejor distribución de vegetales para el campo encontrada es:")
     print(resultado)
-    print (mejores_parametros) #DESPUES BORRAR ESTA LINEA
+    print (mejores_parametros) #DESPUES BORRAR ESTO
 # Ejecutar la función para iniciar la interacción
 ejecutar_meta_algoritmo_interactivo()
